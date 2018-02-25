@@ -43,12 +43,13 @@ export default class ChatContainer extends Component {
         const { chats } = this.state;
 
         const newChats = reset ? [chat] : [...chats, chat];
-        this.setState({chats: newChats});
+        // this.setState({chats: newChats, activeChat: reset ? chat: this.state.activeChat});
+        this.setState({chats: newChats, activeChat: reset ? chat : this.state.activeChat});
 
         const messageEvent = `${MESSAGE_RECEIVED}-${chat.id}`;
         const typingEvent = `${TYPING}-${chat.id}`;
 
-        socket.on(typingEvent)
+        socket.on(typingEvent, this.updateTypingInChat(chat.id))
         socket.on(messageEvent, this.addMessageToChat(chat.id))
     }
 
@@ -62,7 +63,7 @@ export default class ChatContainer extends Component {
             const { chats } = this.state
             let newChats = chats.map( (chat) => {
                 if(chat.id === chatId) {
-                    chat.message.push(message);
+                    chat.messages.push(message);
                 }
                 return chat;
             });
@@ -76,7 +77,24 @@ export default class ChatContainer extends Component {
      * @param chatId {number}
      */
     updateTypingInChat = (chatId) => {
+        return ({isTyping, user}) => {
+            if(user !== this.props.user.name) {
 
+                const { chats } = this.state;
+                
+                let newChats = chats.map((chat) => {
+                    if(chat.id === chatId) {
+                        if(isTyping && !chat.typingUsers.includes(user)) { // user typing is already in the typing users in chat
+                            chat.typingUsers.push(user);
+                        } else if(!isTyping && chat.typingUsers.includes(user)) { // user is not typing and already in typing users array in chat
+                            chat.typingUsers = chat.typingUsers.filter(u => u !== user);
+                        }
+                    }
+                    return chat;
+                })
+                this.setState({chats: newChats});
+            }
+        }
     }
 
     /**
@@ -92,11 +110,11 @@ export default class ChatContainer extends Component {
     /**
      * Sends typing status to server
      * @param chatId {number} the id of the chat being typed in
-     * @param typing {boolean} if the user is tying still or not
+     * @param isTyping {boolean} if the user is tying still or not
      */
-    sendTyping = (chatId, typing) => {
+    sendTyping = (chatId, isTyping) => {
         const { socket } = this.props;
-        socket.emit(TYPING, { chatId, typing });
+        socket.emit(TYPING, { chatId, isTyping });
     }
     
     render() {
@@ -120,7 +138,7 @@ export default class ChatContainer extends Component {
                                 <Messages 
                                     messages={activeChat.messages} 
                                     user={user} 
-                                    typingUser={activeChat.typingUser}
+                                    typingUsers={activeChat.typingUsers}
                                     />
                                 <MessageInput 
                                     sendMessage={

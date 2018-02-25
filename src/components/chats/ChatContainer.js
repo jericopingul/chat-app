@@ -129,7 +129,6 @@ export default class ChatContainer extends Component {
                     activeChat={activeChat} 
                     setActiveChat={this.setActiveChat} 
                     />
-                Chat Container
                 <div className="chat-room-container">
                     {
                         activeChat !== null ? (

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import SideBar from './SideBar';
-import { MESSAGE_SENT, TYPING, COMMUNITY_CHAT, MESSAGE_RECEIVED } from '../../Events';
+import { MESSAGE_SENT, TYPING, COMMUNITY_CHAT, MESSAGE_RECEIVED, PRIVATE_MESSAGE } from '../../Events';
 import ChatHeading from './ChatHeading';
 import Messages from '../messages/Messages';
 import MessageInput from '../messages/MessageInput';
@@ -20,7 +20,23 @@ export default class ChatContainer extends Component {
 
     componentDidMount() {
         const { socket } = this.props;
+        // socket.emit(COMMUNITY_CHAT, this.resetChat);
+        this.initSocket(socket);
+    }
+
+    initSocket(socket) {
+        const { user } = this.props;
         socket.emit(COMMUNITY_CHAT, this.resetChat);
+        socket.on(PRIVATE_MESSAGE, this.addChat);
+        socket.on('connect', () => {
+            socket.emit(COMMUNITY_CHAT, this.resetChat)
+        })
+        // socket.emit(PRIVATE_MESSAGE, {receiver: "mike", sender: user.name})
+    }
+
+    sendOpenPrivateMessage = (receiver) => {
+        const { socket, user } = this.props;
+        socket.emit(PRIVATE_MESSAGE, {receiver, sender: user.name});
     }
 
     /**
@@ -38,7 +54,7 @@ export default class ChatContainer extends Component {
      * @param {Chat} chat the chat to be added
      * @param {boolean} reset if true will set the chat as the only chat
      */
-    addChat = (chat, reset) => {
+    addChat = (chat, reset = false) => {
         const { socket } = this.props;
         const { chats } = this.state;
 
@@ -127,7 +143,8 @@ export default class ChatContainer extends Component {
                     chats={chats} 
                     user={user} 
                     activeChat={activeChat} 
-                    setActiveChat={this.setActiveChat} 
+                    setActiveChat={this.setActiveChat}
+                    onSendPrivateMessage={this.sendOpenPrivateMessage}
                     />
                 <div className="chat-room-container">
                     {

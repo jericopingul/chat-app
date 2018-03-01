@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import SideBar from './SideBar';
+import SideBar from '../sidebar/SideBar';
 import { MESSAGE_SENT, TYPING, COMMUNITY_CHAT, MESSAGE_RECEIVED, PRIVATE_MESSAGE } from '../../Events';
 import ChatHeading from './ChatHeading';
 import Messages from '../messages/Messages';
@@ -10,7 +10,8 @@ export default class ChatContainer extends Component {
         super(props);
         this.state = {
             chats: [],
-            activeChat: null
+            activeChat: null,
+            users: [{id:2, name:"Mike"}, {id:1, name:"Cinderella"}, {id:3, name:"Jimmy"}]
         };
     }
 
@@ -30,7 +31,7 @@ export default class ChatContainer extends Component {
         socket.on(PRIVATE_MESSAGE, this.addChat);
         socket.on('connect', () => {
             socket.emit(COMMUNITY_CHAT, this.resetChat)
-        })
+        });
         // socket.emit(PRIVATE_MESSAGE, {receiver: "mike", sender: user.name})
     }
 
@@ -135,13 +136,14 @@ export default class ChatContainer extends Component {
     
     render() {
         const { user, logout} = this.props;
-        const { chats, activeChat } = this.state;
+        const { chats, activeChat, users } = this.state;
         return (
             <div className="container">
                 <SideBar 
                     logout={logout} 
                     chats={chats} 
-                    user={user} 
+                    user={user}
+                    users={users}
                     activeChat={activeChat} 
                     setActiveChat={this.setActiveChat}
                     onSendPrivateMessage={this.sendOpenPrivateMessage}

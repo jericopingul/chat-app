@@ -52,7 +52,6 @@ export default class MessageInput extends Component {
      * Stop the interval from checking if the user is typing.
      */
     stopCheckingTyping = () => {
-        console.log("Stop typing");
         if(this.typingInterval) {
             clearInterval(this.typingInterval);
             this.props.sendTyping(false);

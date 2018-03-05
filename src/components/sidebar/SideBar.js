@@ -32,6 +32,7 @@ export default class SideBar extends Component {
     }
 
     addChatForUser = (username) => {
+        this.setActiveSideBar(SideBar.type.CHATS);
         this.props.onSendPrivateMessage(username);
     }
 
@@ -39,7 +40,6 @@ export default class SideBar extends Component {
         this.setState({activeSideBar: newSideBar})
     }
     
-
     render() {
         const { chats, activeChat, user, setActiveChat, logout, users } = this.props;
         const { receiver, activeSideBar } = this.state;
@@ -62,12 +62,12 @@ export default class SideBar extends Component {
                     <div className="side-bar-select">
                         <div 
                             onClick ={() => { this.setActiveSideBar(SideBar.type.CHATS) }}
-                            className={`side-bar-select__option ${(activeSideBar === SideBar.type.CHATS)}`}>
+                            className={`side-bar-select__option ${(activeSideBar === SideBar.type.CHATS) ? 'active' : ''}`}>
                             <span>Chats</span>
                         </div>
                         <div 
                             onClick ={() => { this.setActiveSideBar(SideBar.type.USERS) }}
-                            className={`side-bar-select__option ${(activeSideBar === SideBar.type.USERS)}`}>
+                            className={`side-bar-select__option ${(activeSideBar === SideBar.type.USERS) ? 'active' : ''}`}>
                             <span>Users</span>    
                         </div>
                     </div>

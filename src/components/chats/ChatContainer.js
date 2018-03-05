@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import SideBar from '../sidebar/SideBar';
-import { MESSAGE_SENT, TYPING, COMMUNITY_CHAT, MESSAGE_RECEIVED, PRIVATE_MESSAGE } from '../../Events';
+import { MESSAGE_SENT, TYPING, COMMUNITY_CHAT, MESSAGE_RECEIVED, PRIVATE_MESSAGE, USER_CONNECTED, USER_DISCONNECTED } from '../../Events';
 import ChatHeading from './ChatHeading';
 import Messages from '../messages/Messages';
 import MessageInput from '../messages/MessageInput';
+import { values } from 'lodash';
 
 export default class ChatContainer extends Component {
     constructor(props) {
@@ -11,7 +12,7 @@ export default class ChatContainer extends Component {
         this.state = {
             chats: [],
             activeChat: null,
-            users: [{id:2, name:"Mike"}, {id:1, name:"Cinderella"}, {id:3, name:"Jimmy"}]
+            users: []
         };
     }
 
@@ -25,6 +26,13 @@ export default class ChatContainer extends Component {
         this.initSocket(socket);
     }
 
+    componentWillUnmount = () => {
+        const { socket } = this.props;
+        socket.off( PRIVATE_MESSAGE );
+        socket.off( USER_CONNECTED );
+        socket.off( USER_DISCONNECTED );
+    }
+    
     initSocket(socket) {
         const { user } = this.props;
         socket.emit(COMMUNITY_CHAT, this.resetChat);
@@ -33,6 +41,12 @@ export default class ChatContainer extends Component {
             socket.emit(COMMUNITY_CHAT, this.resetChat)
         });
         // socket.emit(PRIVATE_MESSAGE, {receiver: "mike", sender: user.name})
+        socket.on(USER_CONNECTED, (users) => {
+            this.setState({ users: values(users) });
+        })
+        socket.on(USER_DISCONNECTED, (users) => {
+            this.setState({ users: values(users) });
+        })
     }
 
     sendOpenPrivateMessage = (receiver) => {
